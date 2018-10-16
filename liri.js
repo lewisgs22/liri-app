@@ -1,32 +1,17 @@
 require("dotenv").config();
-
-// var keys = require('./keys.js');
-
-// var spotify = new Spotify(keys.spotify);
-
 //-------------------VARIABLES----------------------------------------------------
 
-//Loading modules
-// var Twitter = require('twitter');
 var keys = require("./keys.js");
 var Spotify = require('node-spotify-api');
 var spotify = new Spotify(keys.spotify);
+var omdbKey = keys.omdbKey;
 var request = require('request');
 var fs = require('fs');
-
-// var tweetsArray = [];
+var moment = require('moment')
 var inputCommand = process.argv[2];
 var commandParam = process.argv[3];
-var defaultMovie = "Ex Machina";
-var defaultSong = "Radioactive";
-
-
-
-
-var omdbKey = keys.omdbKey;
-
-
-
+var defaultMovie = "Get Out";
+var defaultSong = "Disciples";
 
 
 //-----------------------FUNCTIONS-----------------------------------------------
@@ -34,37 +19,32 @@ var omdbKey = keys.omdbKey;
 //This function processes the input commands
 function processCommands(command, commandParam){
 
-	//console.log(commandParam);
-
 	switch(command){
 
 	case 'spotify-this-song':
-		//If user has not specified a song , use default
 		if(commandParam === undefined){
 			commandParam = defaultSong;
 		}     
 		spotifyThis(commandParam); break;
 	case 'movie-this':
-		//If user has not specified a movie Name , use default
 		if(commandParam === undefined){
 			commandParam = defaultMovie;
 		}    
 		movieThis(commandParam); break;
+	case 'concert-this':
+		concertThis(); break;
 	case 'do-what-it-says':
 		doWhatItSays(); break;
 	default: 
-		console.log("Invalid command. Please type any of the following commnds: my-tweets spotify-this-song movie-this or do-what-it-says");
+		console.log("Invalid command. Please type any of the following commnds: spotify-this-song movie-this or do-what-it-says");
 }
-
-
-}
+};
 
 function spotifyThis(song){
 
-	//If user has not specified a song , default to "Radioactive" imagine dragons
-	if(song === ""){
-		song = "Radioactive";
-	}
+	// if(song === ""){
+	// 	song = defaultSong;
+	// }
 
 	spotify.search({ type: 'track', query: song}, function(err, data) {
     if (err) {
@@ -88,20 +68,20 @@ function spotifyThis(song){
     console.log(song.album.name);
 
 	});
-
-}
+};
 
 function movieThis() {
-	// OMDB Movie - this MOVIE base code is from class files, I have modified for more data and assigned parse.body to a Var
+
 	var movieName = commandParam;
-	// Then run a request to the OMDB API with the movie specified
-	var queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&tomatoes=true&apikey=" + omdbKey;
+	
+	var queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&tomatoes=true&apikey=trilogy";
 
 	request(queryUrl, function (error, response, body) {
 
-		// If the request is successful = 200
-		if (!error /*&& response.statusCode === 200*/) {
+		if (!error && response.statusCode === 200) {
 			var body = JSON.parse(body);
+
+			// console.log(body);
 
 	    	console.log("-----Title-----");
 	    	console.log(body.Title);
@@ -112,8 +92,8 @@ function movieThis() {
 	   		console.log("-----IMDB Rating-----");
 			console.log(body.imdbRating);
 			   
-			// console.log("-----Rotten Tomatoes Rating-----");
-			// console.log(body.Ratings[2].Value);
+			console.log("-----Rotten Tomatoes Rating-----");
+			console.log(body.Ratings[2].Value);
 
 	   		console.log("-----Country Produced-----");
 	   		console.log(body.Country);
@@ -130,17 +110,23 @@ function movieThis() {
 	    } else {
 			//else - throw error
 			console.log("Error occurred.")
-		}
-		//Response if user does not type in a movie title
-		if (movieName === "Mr. Nobody") {
-			console.log("-----------------------");
-			console.log("If you haven't watched 'Mr. Nobody,' then you should: http://www.imdb.com/title/tt0485947/");
-			console.log("It's on Netflix!");
-		}
+		};
 	});
 };
 
-function doWhatItSays(){
+function concertThis() {
+	var artist = commandParam;
+	var queryURL = "https://rest.bandsintown.com/artists/" + artist +"/events?app_id=codingbootcamp";
+	request(queryURL, function (error, response, body) {
+        if (error) console.log(error);
+		var result  =  JSON.parse(body)[0];
+        console.log("Venue name: " + result.venue.name);
+        console.log("Venue location: " + result.venue.city);
+        console.log("Date of Event: " +  moment(result.datetime).format("MM/DD/YYYY"));
+})
+};
+
+function doWhatItSays() {
 	fs.readFile('random.txt', 'utf8', function(err, data){
 
 		if (err){ 
@@ -151,7 +137,7 @@ function doWhatItSays(){
 
 		processCommands(dataArr[0], dataArr[1]);
 	});
-}
+};
 
 
 
