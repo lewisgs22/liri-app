@@ -11,7 +11,7 @@ var moment = require('moment')
 var inputCommand = process.argv[2];
 var commandParam = process.argv[3];
 var defaultMovie = "Get Out";
-var defaultSong = "Disciples";
+var defaultSong = "Hello";
 
 
 //-----------------------FUNCTIONS-----------------------------------------------
@@ -27,8 +27,9 @@ function processCommands(command, commandParam){
 		}     
 		spotifyThis(commandParam); break;
 	case 'movie-this':
-		if(commandParam === undefined){
+		if(commandParam === undefined) {
 			commandParam = defaultMovie;
+			// console.log(commandParam);
 		}    
 		movieThis(commandParam); break;
 	case 'concert-this':
@@ -73,6 +74,7 @@ function spotifyThis(song){
 function movieThis() {
 
 	var movieName = commandParam;
+	// console.log(movieName);
 	
 	var queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&tomatoes=true&apikey=trilogy";
 
@@ -93,7 +95,7 @@ function movieThis() {
 			console.log(body.imdbRating);
 			   
 			console.log("-----Rotten Tomatoes Rating-----");
-			console.log(body.Ratings[2].Value);
+			console.log(body.Ratings[2]);
 
 	   		console.log("-----Country Produced-----");
 	   		console.log(body.Country);
